@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './register.css';
+import '../page-styles/register.css';
 
-export default function Register() {
+const Register = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: '',
@@ -15,37 +15,51 @@ export default function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        console.log('Form data:', formData);
+
         try {
-            const response = await fetch('http://localhost:3000/customers', {
+            const response = await fetch('http://localhost:5000/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(formData)
             });
-            if(response.ok) {
-                localStorage.setItem('successfulRegister', 'True');
+            console.log('Response status:', response.status); // Log the response status
+            if (response.status === 409) {
+                console.log('409 Conflict detected');
+                alert("Email already registered with an account. Please login.");
+            } else if (response.ok) {
                 console.log('User was successfully registered');
-                navigate('/home');
+                navigate('/login');
             } else {
                 console.log('Failed to register user');
             }
         } catch (error) {
-            console.error(error);
+            console.error('Error registering user:', error);
         }
+    }
+
+    const returnHome = () => {
+        navigate('/');
+    }
+    const returnLogin = () => {
+        navigate('/login');
     }
     return (
         <div>
-            <form onSubmit={handleSubmit}>
-                <input type="text" placeholder="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-                <input type="email" placeholder="Email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-                <input type="text" placeholder="Phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-                <input type="text" placeholder="Address" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
-                <input type="password" placeholder="Password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
-                <button type='submit'>Register</button>
+            <form onSubmit={handleSubmit} id='registerForm'>
+                <input className="registerInput" type="text" placeholder="NAME" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+                <input className="registerInput" type="email" placeholder="EMAIL" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
+                <input className="registerInput" type="text" placeholder="PHONE" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} required />
+                <input className="registerInput" type="text" placeholder="ADDRESS" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} required />
+                <input className="registerInput" type="password" placeholder="PASSWORD" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} required />
+                <button className="registerButton" type="submit">REGISTER</button>
+                <button className='registerButton' id='smallerButton' onClick={returnLogin}>ALREADY HAVE AN ACCOUNT?</button>
+                <button className="registerButton" onClick={returnHome}>HOME</button>
             </form>
         </div>
-    );      
-};
+    );
+}
 
-
+export default Register;
